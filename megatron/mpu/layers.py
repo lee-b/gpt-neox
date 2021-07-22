@@ -246,13 +246,13 @@ class ParallelRelativePositionBias(torch.nn.Module):
             k_pos = torch.arange(k_len, dtype=torch.long, device=torch.cuda.current_device())
             rel_pos = k_pos[None, :] - q_pos[:, None]
             rp_bucket = self._relative_position_bucket(rel_pos, num_buckets=self.num_buckets,
-                                                       max_distance=self.max_distance)
+                                                       max_distance=self.max_distance) 
         else:
             rp_bucket = self._rel_pos_bucket_cached
         values = F.embedding(rp_bucket, self.weight, self.padding_idx,
                              self.max_norm, self.norm_type, self.scale_grad_by_freq, self.sparse)
         bias = rearrange(values, 'i j h -> () h i j')
-        return bias
+        return bias * math.sqrt(self.heads)
 
 
 class ColumnParallelLinear(torch.nn.Module):
